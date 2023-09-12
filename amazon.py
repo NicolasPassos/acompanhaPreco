@@ -28,6 +28,8 @@ if gridProdutos:
         nomeProduto = produto.find('a',attrs={"class":"a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal"})
         nomeProduto = nomeProduto.find('span',attrs={"class":"a-size-base-plus a-color-base a-text-normal"}).contents[0].replace('\u2013','-').replace('\u00a0','')
         precoProduto = produto.find('span',attrs={"class":"a-price","data-a-size":"xl"})
+        if precoProduto is None:
+            continue
         precoProduto = precoProduto.find('span',attrs={"class":"a-offscreen"}).contents[0].replace('\xa0','').replace('\u00a0','')
         linkProduto = produto.find('a',attrs={"class":"a-link-normal s-no-outline"}).attrs['href']
         linkProduto = 'https://www.amazon.com.br'+ linkProduto
