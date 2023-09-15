@@ -26,19 +26,31 @@ if gridProdutos:
     listaProdutos = []
     for produto in gridProdutos:
         nomeProduto = produto.find('a',attrs={"class":"a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal"})
-        nomeProduto = nomeProduto.find('span',attrs={"class":"a-size-base-plus a-color-base a-text-normal"}).contents[0].replace('\u2013','-').replace('\u00a0','')
+        nomeProduto = nomeProduto.find('span',attrs={"class":"a-size-base-plus a-color-base a-text-normal"}).contents[0]
         precoProduto = produto.find('span',attrs={"class":"a-price","data-a-size":"xl"})
         if precoProduto is None:
             continue
-        precoProduto = precoProduto.find('span',attrs={"class":"a-offscreen"}).contents[0].replace('\xa0','').replace('\u00a0','')
+        precoProduto = precoProduto.find('span',attrs={"class":"a-offscreen"}).contents[0]
         linkProduto = produto.find('a',attrs={"class":"a-link-normal s-no-outline"}).attrs['href']
         linkProduto = 'https://www.amazon.com.br'+ linkProduto
+        contemPrime = produto.find('span',attrs={"class":"aok-inline-block s-image-logo-view"})
+        if contemPrime is not None:
+            prime = True
+            previsaoEntrega = contemPrime.find('span',attrs={"class":"a-color-base a-text-bold"})
+            previsaoEntrega = f'Receba até {previsaoEntrega}'
+        else:
+            prime = False
+            previsaoEntrega = 'Indisponível'
 
-        resultado = {"nomeProduto":f"{nomeProduto}","precoProduto":f"{precoProduto}","linkProduto":f"{linkProduto}"}
+        resultado = {"nomeProduto":f"{nomeProduto}",
+                     "precoProduto":f"{precoProduto}",
+                     "prime":f"{prime}",
+                     "previsaoEntrega":f"{previsaoEntrega}",
+                     "linkProduto":f"{linkProduto}"}
         listaProdutos.append(resultado)
     
     _produtos = {"produtos":listaProdutos}
-    produtos = json.dumps(_produtos, indent=4)
+    produtos = json.dumps(_produtos, indent=4,ensure_ascii=False)
     print(produtos)
 else:
     print('Não foram encontrados os produtos solicitados')
