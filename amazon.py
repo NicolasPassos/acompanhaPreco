@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from time import sleep
 from bs4 import BeautifulSoup
 import json
+import datetime
 
 navegador = webdriver.Edge()
 
@@ -33,10 +34,11 @@ if gridProdutos:
         precoProduto = precoProduto.find('span',attrs={"class":"a-offscreen"}).contents[0]
         linkProduto = produto.find('a',attrs={"class":"a-link-normal s-no-outline"}).attrs['href']
         linkProduto = 'https://www.amazon.com.br'+ linkProduto
-        contemPrime = produto.find('span',attrs={"class":"aok-inline-block s-image-logo-view"})
+        rowEntrega = produto.find('div',attrs={"class":"a-row s-align-children-center"})
+        contemPrime = rowEntrega.find('i',attrs={"class":"a-icon a-icon-prime a-icon-medium"})
         if contemPrime is not None:
             prime = True
-            previsaoEntrega = contemPrime.find('span',attrs={"class":"a-color-base a-text-bold"})
+            previsaoEntrega = rowEntrega.find('span',attrs={"class":"a-color-base a-text-bold"}).contents[0]
             previsaoEntrega = f'Receba até {previsaoEntrega}'
         else:
             prime = False
@@ -49,8 +51,10 @@ if gridProdutos:
                      "linkProduto":f"{linkProduto}"}
         listaProdutos.append(resultado)
     
-    _produtos = {"produtos":listaProdutos}
+    _produtos = {"Data consulta":f"{datetime.datetime.now()}",   
+                 "produtos":listaProdutos}
     produtos = json.dumps(_produtos, indent=4,ensure_ascii=False)
     print(produtos)
+    print('a')
 else:
     print('Não foram encontrados os produtos solicitados')
