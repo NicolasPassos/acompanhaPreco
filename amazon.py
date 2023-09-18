@@ -55,6 +55,5 @@ if gridProdutos:
                  "produtos":listaProdutos}
     produtos = json.dumps(_produtos, indent=4,ensure_ascii=False)
     print(produtos)
-    print('a')
 else:
     print('Não foram encontrados os produtos solicitados')
