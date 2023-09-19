@@ -21,24 +21,25 @@ except common.NoSuchElementException:
 except:
     print('qurebo')
 barraPesquisa.send_keys('Galaxy S23')
+barraPesquisa.send_keys('Galaxy S23')
 barraPesquisa.submit()
 
 sleep(2)
 pesquisa = navegador.find_elements(By.ID, 'search')
 
 pesquisaHTML = BeautifulSoup(pesquisa[0].parent.page_source,'html.parser')
-gridProdutos = pesquisaHTML.find_all('div',attrs={"data-component-type":"s-search-result"})
+gridProdutos = pesquisaHTML.find_all('div',attrs={"data-component-type":"s-search-result"}) 
 
 if gridProdutos:
     listaProdutos = []
     for produto in gridProdutos:
         nomeProduto = produto.find('a',attrs={"class":"a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal"})
-        nomeProduto = nomeProduto.find('span',attrs={"class":"a-size-base-plus a-color-base a-text-normal"}).contents[0].replace('"','')
+        nomeProduto = nomeProduto.find('span',attrs={"class":"a-size-base-plus a-color-base a-text-normal"}).contents[0]
         rowPreco = produto.find('div',attrs={"class":"a-section a-spacing-none a-spacing-top-small s-price-instructions-style"})
         if rowPreco is None:
             continue
         precoProduto = rowPreco.find('span',attrs={"class":"a-price","data-a-size":"xl"})
-        precoProduto = precoProduto.find('span',attrs={"class":"a-offscreen"}).contents[0].replace('\xa0',' ')
+        precoProduto = precoProduto.find('span',attrs={"class":"a-offscreen"}).contents[0]
         rowParcelamento = rowPreco.find_all('div',attrs={"class":"a-row"})
         if rowParcelamento != None:
             possibilidadeParcelamento = True
@@ -54,54 +55,33 @@ if gridProdutos:
                 possibilidadeParcelamento = False
                 parcelas = 'Indisponível'
 
-            parcelas = parcelas.replace('\xa0',' ')
-            
         linkProduto = produto.find('a',attrs={"class":"a-link-normal s-no-outline"}).attrs['href']
         linkProduto = 'https://www.amazon.com.br'+ linkProduto
-        infoEntrega = produto.find_all('div',attrs={"class":"a-section a-spacing-none a-spacing-top-micro"})
-        if len(infoEntrega) == 0:
-            rowEntrega = infoEntrega[0]
-        if len(infoEntrega) > 1:
-            rowEntrega = infoEntrega[1]
-        if rowEntrega != None:
-            rowEntregaPrime = rowEntrega.find('div',attrs={"class":"a-row s-align-children-center"})
-            if rowEntregaPrime != None:
-                contemPrime = rowEntregaPrime.find('i',attrs={"class":"a-icon a-icon-prime a-icon-medium"})
-                prime = True
-                previsaoEntrega = rowEntregaPrime.find('span',attrs={"class":"a-color-base a-text-bold"})
-                if previsaoEntrega != None:
-                    previsaoEntrega =  previsaoEntrega.contents[0]
-                    previsaoEntrega = f'Receba até {previsaoEntrega}'
-                else:
-                    previsaoEntrega = 'Indisponível'
+        rowEntrega = produto.find('div',attrs={"class":"a-section a-spacing-none a-spacing-top-micro"})
+        contemPrime = rowEntrega.find('i',attrs={"class":"a-icon a-icon-prime a-icon-medium"})
+        produtoInternacional = rowEntrega.find("div",attrs={"class":"a-row a-size-base a-color-secondary"})
+        if contemPrime is not None:
+            prime = True
+            if produtoInternacional is not None:
+                internacional = True
+                previsaoEntrega = 'Indisponível'
             else:
-                prime = False
-                gridFrete = rowEntrega.find("span",attrs={"class":"a-color-base"})
-                if gridFrete is not None:
-                    valorFrete = gridFrete.contents[0]
-                    pequenoNegocio = rowEntrega.find("span",attrs={"class":"a-declarative"})
-                    if pequenoNegocio != None:
-                        previsaoEntrega = 'Indisponível'
-                    else:
-                        previsaoEntrega = rowEntrega.find_all("span",attrs={"class":"a-color-base a-text-bold"})
-                        if len(previsaoEntrega) > 1:
-                            previsaoEntrega = f'Receba entre {previsaoEntrega[0].contents[0]} e {previsaoEntrega[1].contents[0]}'
-                        elif len(previsaoEntrega) == 0:
-                            previsaoEntrega = f'Receba até {previsaoEntrega[0].contents[0]}'
-                        else:
-                            previsaoEntrega = 'Indisponível'
-                else:
-                    previsaoEntrega = 'Indisponível'
-
-            produtoInternacional = rowEntrega.find("div",attrs={"class":"a-row a-size-base a-color-secondary"})
-            if produtoInternacional != None:
+                internacional = False
+                previsaoEntrega = rowEntrega.find('span',attrs={"class":"a-color-base a-text-bold"}).contents[0]
+                previsaoEntrega = f'Receba até {previsaoEntrega}'
+        else:
+            if produtoInternacional is not None:
                 internacional = True
             else:
                 internacional = False
-
-        else:
             prime = False
-            previsaoEntrega = 'Indisponível'
+            ##Quando o produto não tem prime e tem previsão de entrega, o código não está encontrando a previsão. Ajustar amanhã.
+            entrega = rowEntrega.find('div',attrs={"class":"a-row a-size-base a-color-secondary s-align-children-center"})
+            if entrega != None:
+                previsaoEntrega = entrega.find('span',attrs={"class":"a-color-base a-text-bold"}).contents[0]
+                previsaoEntrega = f'Receba até {previsaoEntrega}'
+            else:
+                previsaoEntrega = 'Indisponível'
 
 
         resultado = resultado = {"nomeProduto":f"{nomeProduto}",
